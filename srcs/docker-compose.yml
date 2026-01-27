@@ -1,0 +1,195 @@
+# --- Config --- #
+services:
+  mariadb:
+    container_name: mariadb
+    build: requirements/mariadb/
+    restart: always
+    env_file: .env
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin -u root -p$(cat /run/secrets/db_root_password) ping -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db_data:/var/lib/mysql
+    secrets:
+      - db_user_password
+      - db_root_password
+
+  wordpress:
+    container_name: wp_php
+    build: requirements/wordpress/
+    restart: always
+    env_file: .env
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-w", "2", "127.0.0.1", "9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - wp_data:/var/www/wordpress
+    secrets:
+      - db_user_password
+      - wp_user_password
+      - wp_admin_password
+      - redis_user_password
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    container_name: nginx
+    build: requirements/nginx/
+    restart: always
+    env_file: .env
+    ports:
+      - "443:443"
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - wp_data:/var/www/wordpress:ro
+      - static_data:/var/www/static:ro
+    depends_on:
+      wordpress:
+        condition: service_healthy
+      adminer:
+        condition: service_healthy
+
+  redis:
+    container_name: redis
+    build: bonus/redis/
+    restart: always
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    secrets:
+      - redis_user_password
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  adminer:
+    container_name: adminer
+    build: bonus/adminer/
+    restart: always
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-w", "2", "127.0.0.1", "9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  vsftpd:
+    container_name: vsftpd
+    build: bonus/ftp/
+    restart: always
+    env_file: .env
+    ports:
+      - "21:21"
+      - "21100-21150:21100-21150"
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo 'QUIT' | nc localhost 21 | grep '220'"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - wp_data:/var/www/wordpress
+    secrets:
+      - ftp_user_password
+    depends_on:
+      wordpress:
+        condition: service_healthy
+
+  backup:
+    build: bonus/backup
+    container_name: backup
+    restart: always
+    env_file: .env
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "pgrep", "cron"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - wp_data:/var/www/wordpress:ro
+      - backup_data:/backups
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      wordpress:
+        condition: service_healthy
+
+  static:
+    build: bonus/static
+    container_name: static
+    volumes:
+      - static_data:/var/www/static
+
+# --- Networks --- #
+networks:
+  frontend:
+    name: frontend
+  backend:
+    name: backend
+
+# --- Volumes --- #
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/user/data/mariadb'
+  wp_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/user/data/wordpress'
+  backup_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/user/data/backup'
+  static_data:
+
+# --- Secrets --- #
+secrets:
+  db_user_password:
+    file: ../secrets/db_user_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  wp_user_password:
+    file: ../secrets/wp_user_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
+  ftp_user_password:
+    file: ../secrets/ftp_user_password.txt
+  redis_user_password:
+    file: ../secrets/redis_user_password.txt

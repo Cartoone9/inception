@@ -1,0 +1,159 @@
+<!doctype html>
+<html data-theme="dark">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+			
+		<link rel="icon" href="./ressources/favicon.ico">
+
+		<title>Hello! I'm Cartoone</title>
+
+		<style>
+
+		/* --- background --- */
+		.animated-bg {
+			position: relative;
+		}
+
+		.animated-bg::before {
+			content: "";
+			position: fixed;
+			inset: 0;
+			background: radial-gradient(circle at 8% 60%, #1d4ed8, #0f172a, #c026d3, #0f172a, #2dd4bf, #0f172a, #1d4ed8, #0f172a, #c026d3, #c026d3);
+			background-size: 1500% 1500%;
+			animation: gradient 220s linear infinite;
+			opacity: 0.8;
+			z-index: -1;
+		}
+
+		@keyframes gradient {
+		0% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+		100% { background-position: 0% 50%; }
+		}
+
+		/* --- swap word --- */
+		.swap-word {
+			position: relative;
+			display: inline-block;
+		}
+
+		.swap-word .word-default,
+		.swap-word .word-hover {
+			transition: opacity 0.5s ease, filter 0.5s ease;
+		}
+
+		.swap-word .word-hover {
+			top: 0;
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			opacity: 0;
+			filter: blur(8px);
+			white-space: nowrap;
+		}
+
+		.swap-word:hover .word-default {
+			opacity: 0;
+			filter: blur(8px);
+		}
+
+		.swap-word:hover .word-hover {
+			opacity: 1;
+			filter: blur(0);
+		}
+
+		/* --- button glow --- */
+		.github-glow:hover figure {
+			box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+		}
+
+		.behance-glow:hover figure {
+			box-shadow: 0 0 15px rgba(24, 119, 242, 0.5);
+		}
+
+		</style>
+	</head>
+
+	<body class="p-8 min-h-screen flex flex-col items-center justify-center relative animated-bg">
+
+		<!-- <div class="absolute top-8 right-8 flex items-center gap-2 text-white font-medium"> -->
+		<!-- 	<span>EN</span> -->
+		<!-- 	<input type="checkbox" class="toggle border-white text-white bg-transparent" /> -->
+		<!-- 	<span>FR</span> -->
+		<!-- </div> -->
+
+		<h1 class="text-6xl font-bold mt-18 mb-16">Hello!</h1>
+
+		<div class="scale-90">
+
+			<div class="flex flex-col gap-2 mt-4 mb-2 text-center tracking-wide">
+				<span class="swap-word">
+					<span class="text-3xl font-light word-default">My name is 
+						<span class="text-4xl font-bold">Cartoone.</span>
+					</span>
+					<span class="text-3xl font-light word-hover">My name is 
+						<span class="text-4xl font-bold">Joris.</span>
+					</span>
+				</span>
+			</div>
+
+			<div class="flex flex-col gap-2 mt-4 mb-4 text-center">
+				<span class="font-light text-3xl swap-word">
+					<span class="word-default tracking-wide">I'm a student at 42 Paris,</span>
+					<span class="word-hover">I'm having a hard time learning C++,</span>
+				</span>
+
+				<div class="flex flex-col gap-2 mt-2 mb-28 text-center">
+					<span class="font-light text-3xl swap-word">
+						<span class="word-default tracking-tight">and I'd like to work with you.</span>
+						<span class="word-hover">and I need money. I also really like your company.</span>
+					</span>
+				</div>
+
+				<div class="flex flex-col gap-2 text-center">
+					<p class="text-3xl font-light tracking-normal">
+						Check out my projects:
+					</p>
+				</div>
+
+				<div class="flex flex-col gap-4 mt-5">
+					<a href="https://github.com/cartoone9" target="_blank">
+						<div class="hover-3d github-glow">
+							<figure class="w-80 h-28 rounded-2xl">
+								<img src="./ressources/github_tile.png" alt="3D card" class="object-cover object-center h-full w-full" />
+							</figure>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+						</div>
+					</a>
+
+					<a href="https://behance.net/joris_" target="_blank">
+						<div class="hover-3d behance-glow">
+							<figure class="w-80 h-28 rounded-2xl">
+								<img src="./ressources/behance_tile.png" alt="3D card" class="object-cover object-center h-full w-full" />
+							</figure>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+							<div></div>
+						</div>
+					</a>
+				</div>
+			</div>
+	</body>
+
+</html>
